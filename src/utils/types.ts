@@ -1,3 +1,17 @@
+// libs
+import express from 'express';
+
+// interfaces
+import { IUserInformation } from './interfaces';
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: IUserInformation;
+        }
+    }
+}
+
 /* ========== Error Handlers ==========*/
 // error details
 export type ErrorDetail = {
@@ -18,11 +32,11 @@ export type SendData<T> = {
 
 // errors
 export type Errors = {
-    nameApi: string;
+    apiName: string;
     statusCode: number;
     errorCode: string;
     errorMessage: string;
-    errorParams: string[];
+    errorParams?: string[];
     errorDetails?: ErrorDetail[];
 };
 
