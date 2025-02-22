@@ -24,10 +24,10 @@ app.use(bodyParser.json()); // parse JSON in req.body
 app.use(cookieParser()); // parse cookies in req.cookies
 app.use(express.json());
 
-// Ver1.0.1: authentication routes
+// Ver1.0.0: authentication routes
 app.use(authenticationRoutes);
 
-// Ver1.0.1: user routes
+// Ver1.0.0: user routes
 app.use(userRoutes);
 
 /**

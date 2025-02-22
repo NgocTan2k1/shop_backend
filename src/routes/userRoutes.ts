@@ -9,7 +9,7 @@ import authenticationHandler from '../middlewares/authenticationHandler';
 
 const userRoutes = Router();
 
-// Ver1.0.1:
+// Ver1.0.0
 userRoutes.get('/user-information/:userId', authenticationHandler, getUserInformationController);
 
 // userRoutes.post('/sign-up', postUserRegisterController);

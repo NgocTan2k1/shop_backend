@@ -6,7 +6,7 @@ import { AppError } from './responseHandler';
 import { selectUserById } from '../models/userModels';
 import { Errors } from '../utils/types';
 
-// Ver1.0.1: authentication handler
+// Ver1.0.0: authentication handler
 const authenticationHandler = async (request: Request, response: Response, next: NextFunction) => {
     try {
         // Get the authorization header

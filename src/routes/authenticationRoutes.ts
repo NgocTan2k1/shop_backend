@@ -8,7 +8,7 @@ import { getSignIn, getRefreshToken } from '../controllers/authenticationControl
 
 const authenticationRoutes = Router();
 
-// Ver1.0.1
+// Ver1.0.0
 authenticationRoutes.get('/sign-in', getSignIn);
 authenticationRoutes.get('/refresh-authentication', getRefreshToken);
 

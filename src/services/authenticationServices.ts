@@ -11,7 +11,7 @@ import { IGetSignInService, IUserInformation } from '../utils/interfaces';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { selectUserById, selectUserLogin } from '../models/userModels';
 
-// Ver1.0.1: login service
+// Ver1.0.0: sign in service
 export const getSignInService = async (request: Request): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
         // interfaces body
@@ -43,7 +43,7 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
     }
 };
 
-// Ver1.0.1: refresh token service
+// Ver1.0.0: refresh token service
 export const getRefreshTokenService = async (
     request: Request,
     next: NextFunction
