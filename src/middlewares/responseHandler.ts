@@ -11,14 +11,14 @@ export const AppSuccess = <T>({ data }: IAppSuccess<T>): Success<SendData<T>> =>
 });
 
 export const AppError = (
-    nameApi: string,
+    apiName: string,
     statusCode: number,
     errorCode: string,
     errorMessage: string,
-    errorParams: string[],
+    errorParams?: string[],
     errorDetails?: ErrorDetail[]
 ): Errors => ({
-    nameApi,
+    apiName,
     statusCode,
     errorCode,
     errorMessage,

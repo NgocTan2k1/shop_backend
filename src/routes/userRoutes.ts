@@ -1,9 +1,17 @@
 // libs
 import { NextFunction, Request, Response, Router } from 'express';
-import { getUserInformationController } from '../controllers/userControllers';
+
+// controllers
+import { getUserInformationController, postUserRegisterController } from '../controllers/userControllers';
+
+// middlewares
+import authenticationHandler from '../middlewares/authenticationHandler';
 
 const userRoutes = Router();
 
-userRoutes.get('/user-information', getUserInformationController);
+// Ver1.0.0
+userRoutes.get('/user-information/:userId', authenticationHandler, getUserInformationController);
+
+// userRoutes.post('/sign-up', postUserRegisterController);
 
 export default userRoutes;
