@@ -2,14 +2,19 @@
 import { Request, Response, NextFunction } from 'express';
 
 // services
-import { getUserInformationService } from '../services/userServices';
+import { getUserInformationService, postSignUpService } from '../services/userServices';
 
 // utils
 import logger from '../utils/logger';
-import { apiName } from '../utils/constant';
 import { catchAsync } from '../utils/catchAsync';
 
-export const getUserInformationController = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
+/**
+ * Get user information
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ */
+export const getUserInformation = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
     const result = await getUserInformationService(request);
 
     logger.info(JSON.stringify(result), { status: 'end', method: request.method, apiName: request.path });
@@ -17,8 +22,28 @@ export const getUserInformationController = catchAsync(async (request: Request, 
     response.status(200).send(result);
 });
 
-export const postUserRegisterController = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
-    const result = await getUserInformationService(request);
+/**
+ * Sign up controller
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ */
+export const postSignUp = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
+    const result = await postSignUpService(request);
+
+    logger.info(JSON.stringify(result), { status: 'end', method: request.method, apiName: request.path });
+
+    response.status(200).send(result);
+});
+
+/**
+ * User verification controller
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ */
+export const postUserVerification = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
+    const result = await postSignUpService(request);
 
     logger.info(JSON.stringify(result), { status: 'end', method: request.method, apiName: request.path });
 

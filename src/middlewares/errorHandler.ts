@@ -16,7 +16,7 @@ const errorHandler = (error: Errors, request: Request, response: Response, next:
         const errorParams = error.errorParams;
         const errorDetails = error.errorDetails;
 
-        logger.error(errorMessage, { status: 'end', method: request.method, apiName: request.path });
+        logger.error(errorMessage.toString(), { status: 'end', method: request.method, apiName: request.path });
         response.status(statusCode).send({
             apiName,
             errorCode,

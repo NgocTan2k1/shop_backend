@@ -27,7 +27,7 @@ export type Success<SendData> = {
 
 // data response
 export type SendData<T> = {
-    data: T;
+    data?: T;
 };
 
 // errors
@@ -35,7 +35,7 @@ export type Errors = {
     apiName: string;
     statusCode: number;
     errorCode: string;
-    errorMessage: string;
+    errorMessage: string[];
     errorParams?: string[];
     errorDetails?: ErrorDetail[];
 };

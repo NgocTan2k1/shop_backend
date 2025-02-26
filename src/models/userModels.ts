@@ -1,6 +1,14 @@
-import { queryPromise } from '../utils/database';
-import { IUserInformation } from '../utils/interfaces';
+import { Connection } from 'mysql';
+import { queryPromise, queryPromiseTransaction } from '../utils/database';
+import { IBodyPostSignUpService, IUserInformation } from '../utils/interfaces';
+import { insertNewUserSchema } from './models';
 
+/**
+ * select user who is signing in
+ * @param username : the username
+ * @param password : the password
+ * @returns
+ */
 export const selectUserLogin = async (username: string, password: string): Promise<IUserInformation[] | []> => {
     try {
         const query = `
@@ -37,6 +45,11 @@ export const selectUserLogin = async (username: string, password: string): Promi
     }
 };
 
+/**
+ * select user by userId
+ * @param userId : the userId
+ * @returns
+ */
 export const selectUserById = async (userId: string): Promise<IUserInformation[] | []> => {
     try {
         const query = `
@@ -69,5 +82,66 @@ export const selectUserById = async (userId: string): Promise<IUserInformation[]
         // TODO
         console.error(error);
         throw error;
+    }
+};
+
+/**
+ * insert new user
+ * @param transaction {Connection} : the transaction
+ * @param userInfo {IBodyPostSignUpService} : the user information
+ * @returns
+ */
+export const insertNewUser = async (transaction: Connection, userInfo: insertNewUserSchema): Promise<[success: any, error: any]> => {
+    try {
+        const query = `
+            INSERT INTO M_USERS (
+                USER_ID,
+                USER_FIRST_NAME,
+                USER_LAST_NAME,
+                USER_NAME,
+                USER_EMAIL,
+                USER_PASSWORD,
+                USER_PHONE_NUMBER,
+                USER_ADDRESS,
+                USER_DELETE_FLG,
+                USER_VERIFY,
+                USER_VERIFY_TOKEN,
+                USER_TOKEN_EXPIRATION,
+                USER_CREATED_BY,
+                USER_CREATED_AT,
+                USER_CREATED_AT_SYSTEM,
+                USER_UPDATED_BY,
+                USER_UPDATED_AT,
+                USER_UPDATED_AT_SYSTEM
+            ) 
+            VALUES (uuid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+            'test',
+            userInfo.firstname,
+            userInfo.lastname,
+            userInfo.username,
+            userInfo.email,
+            userInfo.password,
+            userInfo.phoneNumber,
+            userInfo.address,
+            0,
+            0,
+            null,
+            null,
+            'USER',
+            Date.now(),
+            Date.now(),
+            'USER',
+            Date.now(),
+            Date.now(),
+        ];
+
+        const result = transaction ? await queryPromise<any>(query, values) : queryPromiseTransaction(transaction, query, values);
+
+        return [result, null];
+    } catch (error) {
+        return [null, error];
     }
 };

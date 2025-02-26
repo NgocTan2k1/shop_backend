@@ -14,7 +14,7 @@ export const AppError = (
     apiName: string,
     statusCode: number,
     errorCode: string,
-    errorMessage: string,
+    errorMessage: string[],
     errorParams?: string[],
     errorDetails?: ErrorDetail[]
 ): Errors => ({

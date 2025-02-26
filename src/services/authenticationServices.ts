@@ -11,7 +11,7 @@ import { IGetSignInService, IUserInformation } from '../utils/interfaces';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { selectUserById, selectUserLogin } from '../models/userModels';
 
-// Ver1.0.0: sign in service
+// ===== Ver1.0.0 ===== : sign in service
 export const getSignInService = async (request: Request): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
         // interfaces body
@@ -27,7 +27,7 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
         const users = await selectUserLogin(username, password);
 
         // check user information
-        if (users.length != 1) throw AppError(request.path, 400, 'E0001', 'Bad request!!!', ['userId']);
+        if (users.length != 1) throw AppError(request.path, 400, 'E0001', ['Bad request!!!'], ['userId']);
 
         // get user information
         const user = users[0];
@@ -43,55 +43,14 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
     }
 };
 
-// Ver1.0.0: refresh token service
+// ===== Ver1.0.0 ===== : refresh token service
 export const getRefreshTokenService = async (
     request: Request,
     next: NextFunction
 ): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
-        // interfaces body
-        interface UserBody {
-            refreshToken: string;
-        }
+        const user = request.user as IUserInformation;
 
-        // get variables in body
-        const { refreshToken } = request.body as unknown as UserBody;
-
-        // check refresh token
-        if (!refreshToken) {
-            throw AppError(request.path, 403, 'E0002', 'Refresh Token not found', ['refreshToken']);
-        }
-
-        let authentionError: Errors | null = null;
-
-        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, async (err, user) => {
-            if (err) {
-                // Forbidden: Invalid token
-                authentionError = AppError(request.path, 403, 'E0002', 'Unauthorization', ['refreshToken']);
-                return;
-            }
-            // Set user information
-            request.user = user as IUserInformation;
-
-            // Get users information in database
-            const users = await selectUserById(request.user?.userId);
-
-            // Check user information
-            if (users.length != 1) {
-                authentionError = AppError(request.path, 401, 'E0003', 'The user does not exist in database', ['userId']);
-                return;
-            }
-        });
-        if (authentionError !== null) {
-            throw authentionError;
-        }
-
-        // check user information
-        if (!request.user) throw AppError(request.path, 400, 'E0001', 'Bad request!!!', ['userId']);
-
-        const user = request.user;
-
-        // generate token & refresh token
         const newToken = generateAccessToken(user);
         const newRefreshToken = generateRefreshToken(user);
 
