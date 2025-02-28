@@ -1,7 +1,11 @@
+// libs
 import { Connection } from 'mysql';
-import { queryPromise, queryPromiseTransaction } from '../utils/database';
-import { IBodyPostSignUpService, IUserInformation } from '../utils/interfaces';
+
+// models
 import { insertNewUserRoleSchema } from './models';
+
+// utils
+import { queryPromise, queryPromiseTransaction } from '../utils/database';
 
 /**
  * insert new user role

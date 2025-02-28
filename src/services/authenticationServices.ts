@@ -4,11 +4,13 @@ import { Request } from 'express';
 // middlewares
 import { AppError, AppSuccess } from '../middlewares/responseHandler';
 
+// models
+import { selectUserLogin } from '../models/userModels';
+
 // utils
 import { Errors, SendData, Success } from '../utils/types';
 import { IGetSignInService, IUserInformation } from '../utils/interfaces';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
-import { selectUserLogin } from '../models/userModels';
 
 // ===== Ver1.0.0 =====
 /**

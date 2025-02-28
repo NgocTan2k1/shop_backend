@@ -1,9 +1,13 @@
 // libs
-import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+
+// models
+import { selectUserById } from '../models/userModels';
+
+// utils
 import { IUserInformation } from '../utils/interfaces';
 import { AppError } from './responseHandler';
-import { selectUserById } from '../models/userModels';
 import { Errors } from '../utils/types';
 
 // ===== Ver1.0.0 =====

@@ -1,7 +1,12 @@
+// libs
 import { Connection } from 'mysql';
-import { queryPromise, queryPromiseTransaction } from '../utils/database';
-import { IBodyPostSignUpService, IUserInformation } from '../utils/interfaces';
+
+// models
 import { insertNewUserSchema } from './models';
+
+// utils
+import { queryPromise, queryPromiseTransaction } from '../utils/database';
+import { IUserInformation } from '../utils/interfaces';
 
 /**
  * select user who is signing in

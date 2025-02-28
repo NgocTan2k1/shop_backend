@@ -1,4 +1,5 @@
 // libs
+import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 
@@ -7,7 +8,6 @@ import { AppError } from '../middlewares/responseHandler';
 
 // interfaces
 import { IUserInformation } from './interfaces';
-import { Request } from 'express';
 
 /**
  * generateAccessToken

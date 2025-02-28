@@ -1,7 +1,10 @@
+// libs
 import { NextFunction, Request, Response } from 'express';
-import { AppError } from './responseHandler';
-import { UserSignUpSchema } from '../utils/validation';
 import { ZodError } from 'zod';
+
+// utils
+import { UserSignUpSchema } from '../utils/validation';
+import { AppError } from './responseHandler';
 import { parseValidationErrors } from '../utils/common';
 import { IBodyPostSignUpService } from '../utils/interfaces';
 
