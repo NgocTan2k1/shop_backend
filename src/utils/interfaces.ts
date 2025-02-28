@@ -33,5 +33,5 @@ export interface IBodyPostSignUpService {
     email: string;
     phoneNumber: string;
     address: string;
-    role?: number;
+    roleId?: number;
 }

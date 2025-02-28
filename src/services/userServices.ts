@@ -1,18 +1,19 @@
 // libs
 import { Request } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 // middlewares
 import { AppError, AppSuccess } from '../middlewares/responseHandler';
 
 // models
+import { insertNewUserSchema, insertNewUserRoleSchema } from '../models/models';
 import { insertNewUser, selectUserById } from '../models/userModels';
+import { insertNewUserRole } from '../models/userRoleModel';
 
 // utils
 import { Errors, SendData, Success } from '../utils/types';
 import { IBodyPostSignUpService, IPostSignUpService, IUserInformation } from '../utils/interfaces';
-import { createTransaction } from '../utils/database';
-import { insertNewUserRole } from '../models/userRoleModel';
-import { insertNewUserSchema, insertNewUserRoleSchema } from '../models/models';
+import { commit, createTransaction, rollback } from '../utils/database';
 
 export const getUserInformationService = async (request: Request): Promise<Success<SendData<IUserInformation>> | Errors> => {
     try {
@@ -38,6 +39,7 @@ export const getUserInformationService = async (request: Request): Promise<Succe
         throw error;
     }
 };
+
 /**
  * post
  * @param {Request} request -
@@ -49,14 +51,14 @@ export const postSignUpService = async (request: Request): Promise<Success<SendD
 
     try {
         // interfaces body
-        interface UserBody extends IBodyPostSignUpService, insertNewUserSchema {
-            userId: string;
-        }
+        interface UserBody extends IBodyPostSignUpService, insertNewUserSchema {}
 
         // get variables in body
         const userInfo = request.body as unknown as UserBody;
 
-        userInfo.userId = 'U' + Date.now();
+        // create new userId
+        userInfo.userId = uuidv4();
+        userInfo.currentTime = new Date().getTime();
 
         // insert new user
         const [insertedUser, errorInsertedUser] = await insertNewUser(transaction, userInfo);
@@ -68,8 +70,9 @@ export const postSignUpService = async (request: Request): Promise<Success<SendD
 
         // insert user role
         const insertInfo: insertNewUserRoleSchema = {
-            roleId: userInfo?.role || 0,
+            roleId: userInfo?.roleId || 1003,
             userId: userInfo.userId,
+            currentTime: userInfo.currentTime,
         };
 
         // insert role for user
@@ -79,6 +82,8 @@ export const postSignUpService = async (request: Request): Promise<Success<SendD
         if (errorInsertedRoleUser) {
             throw AppError(request.path, 400, 'E0001', ["Can't insert role for user"], [], [errorInsertedRoleUser]);
         }
+
+        transaction.commit();
 
         return AppSuccess<IPostSignUpService>({ data: { message: 'Sign up successfully!' } });
     } catch (error) {

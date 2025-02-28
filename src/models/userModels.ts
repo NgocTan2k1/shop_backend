@@ -115,11 +115,11 @@ export const insertNewUser = async (transaction: Connection, userInfo: insertNew
                 USER_UPDATED_AT,
                 USER_UPDATED_AT_SYSTEM
             ) 
-            VALUES (uuid, ?, ?, ?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?, ?, ?, DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s'), ?, ?, DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s'));
         `;
 
         const values = [
-            'test',
+            userInfo.userId,
             userInfo.firstname,
             userInfo.lastname,
             userInfo.username,
@@ -132,14 +132,14 @@ export const insertNewUser = async (transaction: Connection, userInfo: insertNew
             null,
             null,
             'USER',
-            Date.now(),
-            Date.now(),
+            userInfo.currentTime,
+            userInfo.currentTime,
             'USER',
-            Date.now(),
-            Date.now(),
+            userInfo.currentTime,
+            userInfo.currentTime,
         ];
 
-        const result = transaction ? await queryPromise<any>(query, values) : queryPromiseTransaction(transaction, query, values);
+        const result = transaction ? await queryPromiseTransaction(transaction, query, values) : await queryPromise<any>(query, values);
 
         return [result, null];
     } catch (error) {

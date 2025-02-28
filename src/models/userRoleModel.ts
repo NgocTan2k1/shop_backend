@@ -26,12 +26,22 @@ export const insertNewUserRole = async (
                 UPDATED_AT,
                 UPDATED_AT_SYSTEM
             ) 
-            VALUES  (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES  (?, ?, ?, ?, ?, DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s'), ?, ?, DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s'));
         `;
 
-        const values = [insertInfo.roleId, insertInfo.userId, 0, 'SYSTEM', Date.now(), Date.now(), 'SYSTEM', Date.now(), Date.now()];
+        const values = [
+            insertInfo.userId,
+            insertInfo.roleId,
+            0,
+            'SYSTEM',
+            insertInfo.currentTime,
+            insertInfo.currentTime,
+            'SYSTEM',
+            insertInfo.currentTime,
+            insertInfo.currentTime,
+        ];
 
-        const result = transaction ? await queryPromise<any>(query, values) : queryPromiseTransaction(transaction, query, values);
+        const result = transaction ? await queryPromiseTransaction(transaction, query, values) : await queryPromise<any>(query, values);
 
         return [result, null];
     } catch (error) {

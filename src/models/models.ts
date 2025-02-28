@@ -7,9 +7,11 @@ export interface insertNewUserSchema {
     email: string;
     phoneNumber: string;
     address: string;
+    currentTime: number;
 }
 
 export interface insertNewUserRoleSchema {
     userId: string;
     roleId: number;
+    currentTime: number;
 }
