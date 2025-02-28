@@ -10,6 +10,7 @@ export interface IUserInformation {
     phoneNumber: string;
     address: string;
     deleteFlg: number;
+    verify: number;
     createdAt: number;
     updatedAt: number;
 }

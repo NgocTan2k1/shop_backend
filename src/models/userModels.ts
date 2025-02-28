@@ -22,13 +22,13 @@ export const selectUserLogin = async (username: string, password: string): Promi
                 USER_PHONE_NUMBER AS phoneNumber,
                 USER_ADDRESS AS address,
                 USER_DELETE_FLG AS deleteFlg,
+                USER_VERIFY AS verify,
                 USER_CREATED_AT AS createdAt,
                 USER_UPDATED_AT AS updatedAt
             FROM 
                 M_USERS
             WHERE 
-                USER_NAME = ? AND USER_PASSWORD = ? AND USER_DELETE_FLG = 0
-                -- USER_NAME = ? AND USER_PASSWORD = SHA2(? , 256);
+                USER_NAME = ? AND USER_PASSWORD = SHA2(?, 256) AND USER_DELETE_FLG = 0;
         `;
 
         const result = await queryPromise<IUserInformation[]>(query, [username, password]);
@@ -63,6 +63,7 @@ export const selectUserById = async (userId: string): Promise<IUserInformation[]
                 USER_PHONE_NUMBER AS phoneNumber,
                 USER_ADDRESS AS address,
                 USER_DELETE_FLG AS deleteFlg,
+                USER_VERIFY AS verify,
                 USER_CREATED_AT AS createdAt,
                 USER_UPDATED_AT AS updatedAt
             FROM 
@@ -114,7 +115,7 @@ export const insertNewUser = async (transaction: Connection, userInfo: insertNew
                 USER_UPDATED_AT,
                 USER_UPDATED_AT_SYSTEM
             ) 
-            VALUES (uuid, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (uuid, ?, ?, ?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
