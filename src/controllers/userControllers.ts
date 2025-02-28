@@ -9,7 +9,7 @@ import logger from '../utils/logger';
 import { catchAsync } from '../utils/catchAsync';
 
 /**
- * Get user information
+ * Get user information controller
  * @param {Request} request - Request object
  * @param {Response} response - Response object
  * @param {NextFunction} next - Next function
@@ -33,7 +33,7 @@ export const postSignUp = catchAsync(async (request: Request, response: Response
 
     logger.info(JSON.stringify(result), { status: 'end', method: request.method, apiName: request.path });
 
-    response.status(200).send(result);
+    response.status(201).send(result);
 });
 
 /**

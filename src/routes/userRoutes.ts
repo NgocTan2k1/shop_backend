@@ -14,9 +14,11 @@ const userRoutes = Router();
 // POST - sign up
 userRoutes.post('/sign-up', signUpHandler, postSignUp);
 
+// ===== Ver1.0.0 =====
 // POST - user verification
 userRoutes.post('/user-verification/:id', tokenAuthenticationHandler, postUserVerification);
 
+// ===== Ver1.0.0 =====
 // GET - get user information by userId
 userRoutes.get('/user-information/:userId', tokenAuthenticationHandler, getUserInformation);
 

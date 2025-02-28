@@ -1,6 +1,5 @@
 // libs
-import { NextFunction, Request } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request } from 'express';
 
 // middlewares
 import { AppError, AppSuccess } from '../middlewares/responseHandler';
@@ -9,9 +8,14 @@ import { AppError, AppSuccess } from '../middlewares/responseHandler';
 import { Errors, SendData, Success } from '../utils/types';
 import { IGetSignInService, IUserInformation } from '../utils/interfaces';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
-import { selectUserById, selectUserLogin } from '../models/userModels';
+import { selectUserLogin } from '../models/userModels';
 
-// ===== Ver1.0.0 ===== : sign in service
+// ===== Ver1.0.0 =====
+/**
+ * get sign in service
+ * @param { Request } request - Request object
+ * @returns { Promise<Success<SendData<IGetSignInService>> | Errors> } - Success or Errors
+ */
 export const getSignInService = async (request: Request): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
         // interfaces body
@@ -27,14 +31,14 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
         const users = await selectUserLogin(username, password);
 
         // check user information
-        if (users.length != 1) throw AppError(request.path, 400, 'E0001', ['Bad request!!!'], ['userId']);
+        if (users.length != 1) throw AppError(request.path, 403, 'E4001', ['The user information not found'], ['']);
 
         // get user information
         const user = users[0];
 
         // generate token & refresh token
-        const token = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
+        const token = generateAccessToken(request, user);
+        const refreshToken = generateRefreshToken(request, user);
 
         return AppSuccess<IGetSignInService>({ data: { userId: user.userId, token: token, refreshToken: refreshToken } });
     } catch (error) {
@@ -43,16 +47,18 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
     }
 };
 
-// ===== Ver1.0.0 ===== : refresh token service
-export const getRefreshTokenService = async (
-    request: Request,
-    next: NextFunction
-): Promise<Success<SendData<IGetSignInService>> | Errors> => {
+// ===== Ver1.0.0 ===== :
+/**
+ * get new token & refresh
+ * @param { Request } request - Request object
+ * @returns { Promise<Success<SendData<IGetSignInService>> | Errors> } - Success or Errors
+ */
+export const getNewTokenService = async (request: Request): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
         const user = request.user as IUserInformation;
 
-        const newToken = generateAccessToken(user);
-        const newRefreshToken = generateRefreshToken(user);
+        const newToken = generateAccessToken(request, user);
+        const newRefreshToken = generateRefreshToken(request, user);
 
         return AppSuccess<IGetSignInService>({ data: { userId: user.userId, token: newToken, refreshToken: newRefreshToken } });
     } catch (error) {

@@ -13,8 +13,13 @@ import { insertNewUserRole } from '../models/userRoleModel';
 // utils
 import { Errors, SendData, Success } from '../utils/types';
 import { IBodyPostSignUpService, IPostSignUpService, IUserInformation } from '../utils/interfaces';
-import { commit, createTransaction, rollback } from '../utils/database';
+import { createTransaction } from '../utils/database';
 
+/**
+ * get user information controller
+ * @param { Request } request - Request object
+ * @returns { Promise<Success<SendData<IUserInformation>> | Errors> }
+ */
 export const getUserInformationService = async (request: Request): Promise<Success<SendData<IUserInformation>> | Errors> => {
     try {
         // interfaces body
@@ -29,7 +34,7 @@ export const getUserInformationService = async (request: Request): Promise<Succe
         const users = await selectUserById(userId);
 
         // check user information => TODO
-        if (users.length != 1) throw AppError(request.path, 400, 'E0001', ['Bad request!!!'], ['userId']);
+        if (users.length != 1) throw AppError(request.path, 400, 'E4000', ['The user does not exist in database!'], [], []);
 
         // get user information
         const user = users[0];
@@ -41,9 +46,9 @@ export const getUserInformationService = async (request: Request): Promise<Succe
 };
 
 /**
- * post
- * @param {Request} request -
- * @returns
+ * sign up service
+ * @param { Request } request - Request object
+ * @returns { Promise<Success<SendData<IPostSignUpService>> | Errors> }
  */
 export const postSignUpService = async (request: Request): Promise<Success<SendData<IPostSignUpService>> | Errors> => {
     // create transaction
@@ -65,7 +70,7 @@ export const postSignUpService = async (request: Request): Promise<Success<SendD
 
         // check error when insert new user
         if (errorInsertedUser) {
-            throw AppError(request.path, 400, 'E0001', ["Can't insert new user"], [], [errorInsertedUser]);
+            throw AppError(request.path, 400, 'E8000', ['Error when creating a new user'], [], [errorInsertedUser]);
         }
 
         // insert user role
@@ -80,7 +85,7 @@ export const postSignUpService = async (request: Request): Promise<Success<SendD
 
         // check error when insert new role for user
         if (errorInsertedRoleUser) {
-            throw AppError(request.path, 400, 'E0001', ["Can't insert role for user"], [], [errorInsertedRoleUser]);
+            throw AppError(request.path, 400, 'E8001', ['Error when creating a new role for new user'], [], [errorInsertedRoleUser]);
         }
 
         transaction.commit();

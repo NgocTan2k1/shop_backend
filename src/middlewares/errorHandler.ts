@@ -5,7 +5,14 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
 import { Errors } from '../utils/types';
 
-const errorHandler = (error: Errors, request: Request, response: Response, next: NextFunction) => {
+/**
+ * Sign up controller
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
+const errorHandler = async (error: Errors, request: Request, response: Response, next: NextFunction): Promise<void> => {
     try {
         console.log('error-try:', error);
 

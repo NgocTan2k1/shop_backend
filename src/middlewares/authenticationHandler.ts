@@ -8,13 +8,13 @@ import { Errors } from '../utils/types';
 
 // ===== Ver1.0.0 =====
 /**
- * Token authentication handler
+ * Token authentication middleware
  * @param {Request} request - Request object
  * @param {Response} response - Response object
  * @param {NextFunction} next - Next function
- * @returns {void}
+ * @returns {Promise<void>}
  */
-export const tokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction) => {
+export const tokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
     try {
         // Get the authorization header
         const authHeader = request.headers['authorization'] as string;
@@ -24,7 +24,7 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
 
         // Unauthorized
         if (!token) {
-            throw AppError(request.path, 401, 'E0001', ['Token not found'], ['token']);
+            throw AppError(request.path, 400, 'E0410', ['Token not found'], ['token']);
         }
 
         // check when verify
@@ -34,7 +34,7 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
         const promiseJWT = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, async (err, user) => {
             if (err) {
                 // Forbidden: Invalid token
-                authenticationError = AppError(request.path, 403, 'E0002', ['Unauthorization'], ['token']);
+                authenticationError = AppError(request.path, 401, 'E0401', ['Unauthorization'], ['token']);
                 return;
             }
             // Set user information
@@ -45,7 +45,7 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
 
             // Check user information
             if (users.length != 1) {
-                authenticationError = AppError(request.path, 401, 'E0003', ['The user does not exist in database'], ['userId']);
+                authenticationError = AppError(request.path, 400, 'E0411', ['The user does not exist in database'], ['userId']);
                 return;
             }
         });
@@ -66,13 +66,13 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
 
 // ===== Ver1.0.0 =====
 /**
- * Token authentication handler
+ * Refresh Token authentication middleware
  * @param {Request} request - Request object
  * @param {Response} response - Response object
  * @param {NextFunction} next - Next function
- * @returns {void}
+ * @returns {Promise<void>}
  */
-export const refreshTokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction) => {
+export const refreshTokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
     try {
         // interfaces body
         interface UserBody {
@@ -84,7 +84,7 @@ export const refreshTokenAuthenticationHandler = async (request: Request, respon
 
         // check refresh token
         if (!refreshToken) {
-            throw AppError(request.path, 403, 'E0002', ['Refresh Token not found'], ['refreshToken']);
+            throw AppError(request.path, 400, 'E0412', ['Refresh Token not found'], ['refreshToken']);
         }
 
         let authentionError: Errors | null = null;
@@ -92,7 +92,7 @@ export const refreshTokenAuthenticationHandler = async (request: Request, respon
         const promiseJWT = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, async (err, user) => {
             if (err) {
                 // Forbidden: Invalid token
-                authentionError = AppError(request.path, 403, 'E0002', ['Unauthorization'], ['refreshToken']);
+                authentionError = AppError(request.path, 400, 'E0413', ['Unauthorization'], ['refreshToken']);
                 return;
             }
             // Set user information
@@ -111,16 +111,12 @@ export const refreshTokenAuthenticationHandler = async (request: Request, respon
         // await callback in jwt.verify run
         await Promise.all([promiseJWT]);
 
-        if (authentionError !== null) {
-            throw authentionError;
-        }
+        if (authentionError !== null) throw authentionError;
+        // call next function
 
-        // check user information
-        if (!request.user) throw AppError(request.path, 400, 'E0001', ['Bad request!!!'], ['userId']);
-
-        const user = request.user;
+        return next();
     } catch (error) {
         // TODO
-        throw error;
+        return next(error);
     }
 };
