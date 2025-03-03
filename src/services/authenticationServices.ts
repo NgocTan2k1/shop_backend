@@ -57,12 +57,19 @@ export const getSignInService = async (request: Request): Promise<Success<SendDa
  */
 export const getNewTokenService = async (request: Request): Promise<Success<SendData<IGetSignInService>> | Errors> => {
     try {
+        interface UserBody {
+            refreshToken: string;
+        }
+
+        // get user information
         const user = request.user as IUserInformation;
 
-        const newToken = generateAccessToken(request, user);
-        const newRefreshToken = generateRefreshToken(request, user);
+        // get variables in body
+        const { refreshToken } = request.body as unknown as UserBody;
 
-        return AppSuccess<IGetSignInService>({ data: { userId: user.userId, token: newToken, refreshToken: newRefreshToken } });
+        const newToken = generateAccessToken(request, user);
+
+        return AppSuccess<IGetSignInService>({ data: { userId: user.userId, token: newToken, refreshToken: refreshToken } });
     } catch (error) {
         // TODO
         throw error;

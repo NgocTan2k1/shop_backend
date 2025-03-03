@@ -7,7 +7,7 @@ import { AppError, AppSuccess } from '../middlewares/responseHandler';
 
 // models
 import { insertNewUserSchema, insertNewUserRoleSchema } from '../models/models';
-import { insertNewUser, selectUserById, updateNewVerifyCode } from '../models/userModels';
+import { insertNewUser, selectUserById, selectVerifcationInformation, updateNewVerifyCode, updateUserVerification } from '../models/userModels';
 import { insertNewUserRole } from '../models/userRoleModel';
 
 // utils
@@ -92,11 +92,11 @@ export const getUserVerificationService = async (request: Request): Promise<Succ
 
         // generate verification code
         const verifyCode = Math.floor(100000 + Math.random() * 900000);
-        const verifyTokenExpiration = getCurrentTimeAt(Number(process.env.VERIFY_TOKEN_EXPIRATION) || 5);
+        const verifyCodeExpiration = getCurrentTimeAt(Number(process.env.VERIFY_EXPIRATION) || 5);
         const currentTime = getCurrentTimeAt();
 
         // update verification code in database
-        const [updatedUser, errorUpdatedUser] = await updateNewVerifyCode(transaction, { userId: user.userId, verifyCode, verifyTokenExpiration, currentTime });
+        const [updatedUser, errorUpdatedUser] = await updateNewVerifyCode(transaction, { userId: user.userId, verifyCode, verifyCodeExpiration, currentTime });
 
         // check error when update verification code
         if (errorUpdatedUser) {
@@ -121,6 +121,67 @@ export const getUserVerificationService = async (request: Request): Promise<Succ
         return AppSuccess<IMessage>({ data: { message: 'Generated verification code successfully!' } });
     } catch (error) {
         transaction.rollback();
+        throw error;
+    }
+};
+
+/**
+ * user verification service
+ * @param { Request } request - Request object
+ * @returns { Promise<Success<SendData<IMessage>> | Errors> }
+ */
+export const postUserVerificationService = async (request: Request): Promise<Success<SendData<IMessage>> | Errors> => {
+    try {
+        interface UserParams {
+            verifyCode: number;
+        }
+
+        const { verifyCode } = request.params as unknown as UserParams;
+
+        if (!verifyCode) {
+            throw AppError(request.path, 400, 'E4003', ['The verification code is required!'], ['verifyCode'], []);
+        }
+
+        // get variables in request
+        const user = request.user as IUserInformation;
+
+        // check verification information
+        if (user.verify === 1) {
+            throw AppError(request.path, 400, 'E4002', ['The user already authenticated!'], [], []);
+        }
+
+        const verificationInfo = await selectVerifcationInformation({ userId: user.userId });
+
+        if (verificationInfo.length != 1) {
+            throw AppError(request.path, 403, 'E4004', ['No authentication information found!'], [], []);
+        }
+
+        if (verificationInfo[0].verifyCodeExpiration < getCurrentTimeAt()) {
+            throw AppError(request.path, 400, 'E4005', ['The verification code has expired!'], [], []);
+        }
+
+        if (Number(verificationInfo[0].verifyCode) !== Number(verifyCode)) {
+            throw AppError(request.path, 400, 'E4006', ['The verification code is incorrect!'], ['verifyCode'], []);
+        }
+
+        // create transaction
+        const transaction = await createTransaction();
+
+        // update user verification
+        const [updatedUser, errorUpdatedUser] = await updateUserVerification(transaction, { userId: user.userId, currentTime: getCurrentTimeAt() });
+
+        // check error when update verification code
+        if (errorUpdatedUser) {
+            // rollback transaction
+            transaction.rollback();
+            throw AppError(request.path, 400, 'E8003', ['Error when user verification!'], [], [errorUpdatedUser]);
+        }
+
+        // commit transaction
+        transaction.commit();
+
+        return AppSuccess<IMessage>({ data: { message: 'Verification successful' } });
+    } catch (error) {
         throw error;
     }
 };

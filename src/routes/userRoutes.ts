@@ -25,7 +25,7 @@ userRoutes.get('/user-verification', tokenAuthenticationHandler, getUserVerifica
 
 // ===== Ver1.0.0 =====
 // POST - user verification
-userRoutes.post('/user-verification/:verifyToken', tokenAuthenticationHandler, postUserVerificationController);
+userRoutes.post('/user-verification/:verifyCode', tokenAuthenticationHandler, postUserVerificationController);
 
 // ===== Ver1.0.0 =====
 // GET - get user information by userId

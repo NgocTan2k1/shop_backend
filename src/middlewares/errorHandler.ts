@@ -31,8 +31,15 @@ const errorHandler = async (error: Errors, request: Request, response: Response,
             errorParams,
             errorDetails,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.log('error-catch:', error);
+        response.status(400).send({
+            apiName: 'errorHandler',
+            errorCode: 'E9999',
+            errorMessage: 'Error in error handler',
+            errorParams: [''],
+            errorDetails: [error.message],
+        });
         return;
     }
 };

@@ -42,16 +42,19 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
                 return;
             }
             // Set user information
-            request.user = user as IUserInformation;
+            const userInfo = user as IUserInformation;
 
             // Get users information in database
-            const users = await selectUserById(request.user?.userId);
+            const users = await selectUserById(userInfo.userId);
 
             // Check user information
-            if (users.length != 1 || request.user === undefined) {
+            if (users.length != 1 || userInfo === undefined) {
                 authenticationError = AppError(request.path, 400, 'E0411', ['The user does not exist in database'], ['userId']);
                 return;
             }
+
+            // Set user information
+            request.user = users[0];
         });
 
         // await callback in jwt.verify run
@@ -99,26 +102,30 @@ export const refreshTokenAuthenticationHandler = async (request: Request, respon
                 authentionError = AppError(request.path, 400, 'E0413', ['Unauthorization'], ['refreshToken']);
                 return;
             }
+            console.log('user:', user);
             // Set user information
-            request.user = user as IUserInformation;
+            const userInfo = user as IUserInformation;
 
             // Get users information in database
-            const users = await selectUserById(request.user?.userId);
+            const users = await selectUserById(userInfo.userId);
 
             // Check user information
-            if (users.length != 1) {
+            if (users.length !== 1 || userInfo === undefined) {
                 authentionError = AppError(request.path, 401, 'E0003', ['The user does not exist in database'], ['userId']);
                 return;
             }
+
+            // Set user information
+            request.user = users[0];
         });
 
         // await callback in jwt.verify run
         await Promise.all([promiseJWT]);
 
         if (authentionError !== null) throw authentionError;
-        // call next function
 
-        return next();
+        // call next function
+        next();
     } catch (error) {
         // TODO
         return next(error);

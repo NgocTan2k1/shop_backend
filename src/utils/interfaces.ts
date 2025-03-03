@@ -35,3 +35,9 @@ export interface IBodyPostSignUpService {
     address: string;
     roleId?: number;
 }
+
+export interface IVerificationInformation {
+    verify: number;
+    verifyCode: number;
+    verifyCodeExpiration: number;
+}

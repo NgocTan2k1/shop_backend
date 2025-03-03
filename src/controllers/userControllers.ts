@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 // services
-import { getUserInformationService, getUserVerificationService, postSignUpService } from '../services/userServices';
+import { getUserInformationService, getUserVerificationService, postSignUpService, postUserVerificationService } from '../services/userServices';
 
 // utils
 import logger from '../utils/logger';
@@ -43,7 +43,7 @@ export const getUserVerificationController = catchAsync(async (request: Request,
  * @param {NextFunction} next - Next function
  */
 export const postUserVerificationController = catchAsync(async (request: Request, response: Response, next: NextFunction) => {
-    const result = await postSignUpService(request);
+    const result = await postUserVerificationService(request);
 
     logger.info(JSON.stringify(result), { status: 'end', method: request.method, apiName: request.path });
 

@@ -2,11 +2,11 @@
 import { Connection } from 'mysql';
 
 // models
-import { insertNewUserSchema, updateNewVerifyCodeSchema } from './models';
+import { insertNewUserSchema, selectVerifcationInformationSchema, updateNewVerifyCodeSchema, updateUserVerificationSchema } from './models';
 
 // utils
 import { queryPromise, queryPromiseTransaction } from '../utils/database';
-import { IUserInformation } from '../utils/interfaces';
+import { IUserInformation, IVerificationInformation } from '../utils/interfaces';
 
 /**
  * select user who is signing in
@@ -111,8 +111,8 @@ export const insertNewUser = async (transaction: Connection, userInfo: insertNew
                 USER_ADDRESS,
                 USER_DELETE_FLG,
                 USER_VERIFY,
-                USER_VERIFY_TOKEN,
-                USER_TOKEN_EXPIRATION,
+                USER_VERIFY_CODE,
+                USER_VERIFY_CODE_EXPIRATION,
                 USER_CREATED_BY,
                 USER_CREATED_AT,
                 USER_CREATED_AT_SYSTEM,
@@ -165,8 +165,8 @@ export const updateNewVerifyCode = async (transaction: Connection, updateInfo: u
         const query = `
             UPDATE M_USERS
             SET
-                USER_VERIFY_TOKEN = ?,
-                USER_TOKEN_EXPIRATION = ?,
+                USER_VERIFY_CODE = ?,
+                USER_VERIFY_CODE_EXPIRATION = ?,
                 USER_UPDATED_BY = 'USER',
                 USER_UPDATED_AT = ?,
                 USER_UPDATED_AT_SYSTEM = DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s')
@@ -174,9 +174,69 @@ export const updateNewVerifyCode = async (transaction: Connection, updateInfo: u
                 USER_ID = ? AND USER_DELETE_FLG = 0;
         `;
 
-        const values = [updateInfo.verifyCode, updateInfo.verifyTokenExpiration, updateInfo.currentTime, updateInfo.currentTime, updateInfo.userId];
+        const values = [updateInfo.verifyCode, updateInfo.verifyCodeExpiration, updateInfo.currentTime, updateInfo.currentTime, updateInfo.userId];
 
         const result = transaction ? await queryPromiseTransaction(transaction, query, values) : await queryPromise<any>(query, values);
+
+        return [result, null];
+    } catch (error) {
+        return [null, error];
+    }
+};
+
+/**
+ * select verification information
+ * @param { string } userId: the userId
+ * @returns { Promise<IVerificationInformation[] | []> } : the verification information
+ */
+export const selectVerifcationInformation = async ({ userId }: selectVerifcationInformationSchema): Promise<IVerificationInformation[] | []> => {
+    try {
+        const query = `
+            SELECT 
+                USER_VERIFY AS verify,
+                USER_VERIFY_CODE AS verifyCode,
+                USER_VERIFY_CODE_EXPIRATION AS verifyCodeExpiration
+            FROM 
+                M_USERS
+            WHERE 
+                USER_ID = ? AND USER_DELETE_FLG = 0;
+        `;
+
+        const result = await queryPromise<IVerificationInformation[]>(query, [userId]);
+
+        // No record found
+        if (result.length === 0) return [];
+
+        // Return the result
+        return JSON.parse(JSON.stringify(result));
+    } catch (error) {
+        // TODO
+        console.error(error);
+        throw error;
+    }
+};
+
+/**
+ * update user verification
+ * @param updateInfo : the update information
+ * @returns {Promise<[success: any, error: any]>} : the result
+ */
+export const updateUserVerification = async (transaction: Connection, updateInfo: updateUserVerificationSchema): Promise<[success: any, error: any]> => {
+    try {
+        const query = `
+            UPDATE M_USERS
+            SET
+                USER_VERIFY = 1,
+                USER_UPDATED_BY = 'USER',
+                USER_UPDATED_AT = ?,
+                USER_UPDATED_AT_SYSTEM = DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s')
+            WHERE
+                USER_ID = ? AND USER_DELETE_FLG = 0;
+        `;
+
+        const values = [updateInfo.currentTime, updateInfo.currentTime, updateInfo.userId];
+
+        const result = transaction ? await queryPromiseTransaction<any>(transaction, query, values) : await queryPromise<any>(query, values);
 
         return [result, null];
     } catch (error) {

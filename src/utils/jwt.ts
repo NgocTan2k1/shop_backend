@@ -24,7 +24,7 @@ export const generateAccessToken = (request: Request, user: IUserInformation): s
         const secret = process.env.ACCESS_TOKEN_SECRET || 'secret_token';
         const expiration: StringValue = (process.env.ACCESS_TOKEN_EXPIRATION as StringValue) || '5m';
 
-        return jwt.sign(user as object, secret, { expiresIn: expiration });
+        return jwt.sign(user, secret, { expiresIn: expiration });
     } catch (error) {
         throw error;
     }
@@ -42,10 +42,11 @@ export const generateRefreshToken = (request: Request, user: IUserInformation): 
             throw AppError(request.path, 400, 'E0415', ['REFRESH_TOKEN_SECRET is not defined in the environment variables.'], [], []);
         }
         const secret = process.env.REFRESH_TOKEN_SECRET || 'refresh-token-secret';
-        const expiration = (process.env.REFRESH_TOKEN_EXPIRATION as StringValue) || '1d';
+        const expiration: StringValue = (process.env.REFRESH_TOKEN_EXPIRATION as StringValue) || '1d';
 
         return jwt.sign(user, secret, { expiresIn: expiration });
     } catch (error) {
+        console.log('error:', error);
         throw error;
     }
 };
