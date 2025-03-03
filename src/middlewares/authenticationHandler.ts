@@ -48,7 +48,7 @@ export const tokenAuthenticationHandler = async (request: Request, response: Res
             const users = await selectUserById(request.user?.userId);
 
             // Check user information
-            if (users.length != 1) {
+            if (users.length != 1 || request.user === undefined) {
                 authenticationError = AppError(request.path, 400, 'E0411', ['The user does not exist in database'], ['userId']);
                 return;
             }

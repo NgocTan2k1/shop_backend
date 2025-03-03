@@ -11,3 +11,11 @@ export const parseValidationErrors = (errors: ZodIssue[]) => {
 
     return { params, messages };
 };
+/**
+ * get current time at
+ * @param skipTime the time to skip(minutes)
+ * @returns
+ */
+export const getCurrentTimeAt = (skipTime = 0) => {
+    return new Date().getTime() + skipTime * 60000;
+};

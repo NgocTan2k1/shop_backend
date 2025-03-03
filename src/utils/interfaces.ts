@@ -21,7 +21,7 @@ export interface IGetSignInService {
     refreshToken: string;
 }
 
-export interface IPostSignUpService {
+export interface IMessage {
     message: string;
 }
 export interface IBodyPostSignUpService {

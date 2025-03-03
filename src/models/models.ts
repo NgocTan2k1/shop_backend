@@ -15,3 +15,10 @@ export interface insertNewUserRoleSchema {
     roleId: number;
     currentTime: number;
 }
+
+export interface updateNewVerifyCodeSchema {
+    userId: string;
+    verifyCode: number;
+    verifyTokenExpiration: number;
+    currentTime: number;
+}

@@ -2,7 +2,7 @@
 import { Connection } from 'mysql';
 
 // models
-import { insertNewUserSchema } from './models';
+import { insertNewUserSchema, updateNewVerifyCodeSchema } from './models';
 
 // utils
 import { queryPromise, queryPromiseTransaction } from '../utils/database';
@@ -53,7 +53,7 @@ export const selectUserLogin = async (username: string, password: string): Promi
 /**
  * select user by userId
  * @param userId : the userId
- * @returns
+ * @returns {IUserInformation[] | []} : the user information
  */
 export const selectUserById = async (userId: string): Promise<IUserInformation[] | []> => {
     try {
@@ -143,6 +143,38 @@ export const insertNewUser = async (transaction: Connection, userInfo: insertNew
             userInfo.currentTime,
             userInfo.currentTime,
         ];
+
+        const result = transaction ? await queryPromiseTransaction(transaction, query, values) : await queryPromise<any>(query, values);
+
+        return [result, null];
+    } catch (error) {
+        return [null, error];
+    }
+};
+
+/**
+ * update user verification
+ * @param transaction {Connection} : the transaction
+ * @param userId {string} : the userId
+ * @param verifyCode {string} : the verify code
+ * @param currentTime {number} : the current time
+ * @returns
+ */
+export const updateNewVerifyCode = async (transaction: Connection, updateInfo: updateNewVerifyCodeSchema): Promise<[success: any, error: any]> => {
+    try {
+        const query = `
+            UPDATE M_USERS
+            SET
+                USER_VERIFY_TOKEN = ?,
+                USER_TOKEN_EXPIRATION = ?,
+                USER_UPDATED_BY = 'USER',
+                USER_UPDATED_AT = ?,
+                USER_UPDATED_AT_SYSTEM = DATE_FORMAT(FROM_UNIXTIME(? / 1000), '%Y-%m-%d %H:%i:%s')
+            WHERE
+                USER_ID = ? AND USER_DELETE_FLG = 0;
+        `;
+
+        const values = [updateInfo.verifyCode, updateInfo.verifyTokenExpiration, updateInfo.currentTime, updateInfo.currentTime, updateInfo.userId];
 
         const result = transaction ? await queryPromiseTransaction(transaction, query, values) : await queryPromise<any>(query, values);
 
