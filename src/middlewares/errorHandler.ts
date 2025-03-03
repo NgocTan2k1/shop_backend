@@ -5,7 +5,14 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
 import { Errors } from '../utils/types';
 
-const errorHandler = (error: Errors, request: Request, response: Response, next: NextFunction) => {
+/**
+ * Sign up controller
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
+const errorHandler = async (error: Errors, request: Request, response: Response, next: NextFunction): Promise<void> => {
     try {
         console.log('error-try:', error);
 
@@ -16,7 +23,7 @@ const errorHandler = (error: Errors, request: Request, response: Response, next:
         const errorParams = error.errorParams;
         const errorDetails = error.errorDetails;
 
-        logger.error(errorMessage, { status: 'end', method: request.method, apiName: request.path });
+        logger.error(errorMessage.toString(), { status: 'end', method: request.method, apiName: request.path });
         response.status(statusCode).send({
             apiName,
             errorCode,
@@ -24,8 +31,15 @@ const errorHandler = (error: Errors, request: Request, response: Response, next:
             errorParams,
             errorDetails,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.log('error-catch:', error);
+        response.status(400).send({
+            apiName: 'errorHandler',
+            errorCode: 'E9999',
+            errorMessage: 'Error in error handler',
+            errorParams: [''],
+            errorDetails: [error.message],
+        });
         return;
     }
 };

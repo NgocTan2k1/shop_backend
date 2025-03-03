@@ -36,6 +36,7 @@ app.use(userRoutes);
 app.use(errorHandler);
 
 const server = http.createServer(app);
+
 server.listen(port, async () => {
     // test database connection
     await databaseConnectionHandler();

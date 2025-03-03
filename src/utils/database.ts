@@ -35,7 +35,7 @@ export const createTransaction = async () => {
     const transaction = await createDatabaseConnection();
     transaction.connect();
 
-    return new Promise((resolve, reject) => {
+    return new Promise<Connection>((resolve, reject) => {
         transaction.beginTransaction((err) => {
             if (err) {
                 return reject(err);
