@@ -1,5 +1,5 @@
 import winston, { format, transports } from 'winston';
-import { compareAsc, format as dateFormat } from 'date-fns';
+import { format as dateFormat } from 'date-fns';
 
 const myFormat = format.printf(({ status, level, method, apiName, ...args }) => {
     const timestamp = dateFormat(new Date(), 'yyyy-MM-dd hh:mm:ss:SSS');

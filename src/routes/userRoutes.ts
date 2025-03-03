@@ -1,9 +1,34 @@
 // libs
 import { NextFunction, Request, Response, Router } from 'express';
-import { getUserInformationController } from '../controllers/userControllers';
+
+// controllers
+import {
+    getUserInformationController,
+    postSignUpController,
+    postUserVerificationController,
+    getUserVerificationController,
+} from '../controllers/userControllers';
+
+// middlewares
+import { tokenAuthenticationHandler } from '../middlewares/authenticationHandler';
+import { signUpHandler } from '../middlewares/validationHandler';
 
 const userRoutes = Router();
 
-userRoutes.get('/user-information', getUserInformationController);
+// ===== Ver1.0.0 =====
+// POST - sign up
+userRoutes.post('/sign-up', signUpHandler, postSignUpController);
+
+// ===== Ver1.0.0 =====
+// GET - user verification
+userRoutes.get('/user-verification', tokenAuthenticationHandler, getUserVerificationController);
+
+// ===== Ver1.0.0 =====
+// POST - user verification
+userRoutes.post('/user-verification/:verifyCode', tokenAuthenticationHandler, postUserVerificationController);
+
+// ===== Ver1.0.0 =====
+// GET - get user information by userId
+userRoutes.get('/user-information/:userId', tokenAuthenticationHandler, getUserInformationController);
 
 export default userRoutes;

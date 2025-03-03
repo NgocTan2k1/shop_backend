@@ -1,0 +1,133 @@
+// libs
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+
+// models
+import { selectUserById } from '../models/userModels';
+
+// utils
+import { IUserInformation } from '../utils/interfaces';
+import { AppError } from './responseHandler';
+import { Errors } from '../utils/types';
+
+// ===== Ver1.0.0 =====
+/**
+ * Token authentication middleware
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
+export const tokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    try {
+        // Get the authorization header
+        const authHeader = request.headers['authorization'] as string;
+
+        // Get the token from the authorization header
+        const token = authHeader && authHeader.split(' ')[1];
+
+        // Unauthorized
+        if (!token) {
+            throw AppError(request.path, 400, 'E0410', ['Token not found'], ['token']);
+        }
+
+        // check when verify
+        let authenticationError: Errors | null = null;
+
+        // Verify token
+        const promiseJWT = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, async (err, user) => {
+            if (err) {
+                // Forbidden: Invalid token
+                authenticationError = AppError(request.path, 401, 'E0401', ['Unauthorization'], ['token']);
+                return;
+            }
+            // Set user information
+            const userInfo = user as IUserInformation;
+
+            // Get users information in database
+            const users = await selectUserById(userInfo.userId);
+
+            // Check user information
+            if (users.length != 1 || userInfo === undefined) {
+                authenticationError = AppError(request.path, 400, 'E0411', ['The user does not exist in database'], ['userId']);
+                return;
+            }
+
+            // Set user information
+            request.user = users[0];
+        });
+
+        // await callback in jwt.verify run
+        await Promise.all([promiseJWT]);
+
+        // check error when verify
+        if (authenticationError !== null) throw authenticationError;
+
+        // call next function
+        next();
+    } catch (error) {
+        // call error handlers
+        return next(error);
+    }
+};
+
+// ===== Ver1.0.0 =====
+/**
+ * Refresh Token authentication middleware
+ * @param {Request} request - Request object
+ * @param {Response} response - Response object
+ * @param {NextFunction} next - Next function
+ * @returns {Promise<void>}
+ */
+export const refreshTokenAuthenticationHandler = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    try {
+        // interfaces body
+        interface UserBody {
+            refreshToken: string;
+        }
+
+        // get variables in body
+        const { refreshToken } = request.body as unknown as UserBody;
+
+        // check refresh token
+        if (!refreshToken) {
+            throw AppError(request.path, 400, 'E0412', ['Refresh Token not found'], ['refreshToken']);
+        }
+
+        let authentionError: Errors | null = null;
+
+        const promiseJWT = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string, async (err, user) => {
+            if (err) {
+                // Forbidden: Invalid token
+                authentionError = AppError(request.path, 400, 'E0413', ['Unauthorization'], ['refreshToken']);
+                return;
+            }
+            console.log('user:', user);
+            // Set user information
+            const userInfo = user as IUserInformation;
+
+            // Get users information in database
+            const users = await selectUserById(userInfo.userId);
+
+            // Check user information
+            if (users.length !== 1 || userInfo === undefined) {
+                authentionError = AppError(request.path, 401, 'E0003', ['The user does not exist in database'], ['userId']);
+                return;
+            }
+
+            // Set user information
+            request.user = users[0];
+        });
+
+        // await callback in jwt.verify run
+        await Promise.all([promiseJWT]);
+
+        if (authentionError !== null) throw authentionError;
+
+        // call next function
+        next();
+    } catch (error) {
+        // TODO
+        return next(error);
+    }
+};
